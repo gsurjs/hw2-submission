@@ -10,10 +10,26 @@ class HomeScreen extends StatelessWidget {
 
   // Hardcoded list of boards as permitted
   final List<Map<String, dynamic>> boards = const [
-    {'name': 'Games', 'icon': Icons.videogame_asset},
-    {'name': 'Business', 'icon': Icons.business},
-    {'name': 'Public Health', 'icon': Icons.health_and_safety},
-    {'name': 'Study', 'icon': Icons.book},
+    {
+      'name': 'Games',
+      'image': 'assets/images/games_img.png', 
+      'color': Color(0xFFFF6B6B), // Red/Orange
+    },
+    {
+      'name': 'Business',
+      'image': 'assets/images/business_img.png',
+      'color': Color(0xFF4ECDC4), // Teal
+    },
+    {
+      'name': 'Public Health',
+      'image': 'assets/images/health_img.png',
+      'color': Color(0xFFFF8FA3), // Pink
+    },
+    {
+      'name': 'Study',
+      'image': 'assets/images/study_img.png',
+      'color': Color(0xFF9D4EDD), // Deep Purple
+    },
   ];
 
   @override
@@ -61,22 +77,105 @@ class HomeScreen extends StatelessWidget {
       ),
       // 4. Ordered List of Message Boards 
       body: ListView.builder(
+        padding: const EdgeInsets.all(16.0), // Add some spacing around the edges
         itemCount: boards.length,
         itemBuilder: (context, index) {
-          return Card(
-            child: ListTile(
-              leading: Icon(boards[index]['icon'], size: 40),
-              title: Text(boards[index]['name'], style: const TextStyle(fontSize: 20)),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                // 6. Selecting board opens Chat Window
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChatScreen(boardName: boards[index]['name']),
+          final board = boards[index];
+          
+          // Logic: Even numbers (0, 2) = Image Right. Odd numbers (1, 3) = Image Left.
+          bool isImageRight = index % 2 == 0;
+
+          return GestureDetector(
+            onTap: () {
+              // Navigate to Chat
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChatScreen(boardName: board['name']),
+                ),
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 20.0), // Space between banners
+              height: 180, // Banner Height
+              decoration: BoxDecoration(
+                color: board['color'], // Use the specific color
+                borderRadius: BorderRadius.circular(20), // Rounded corners
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
-                );
-              },
+                ],
+              ),
+              // Use ClipRRect to make sure the image doesn't spill out of the rounded corners
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Stack(
+                  children: [
+                    // BACKGROUND CIRCLE DECORATION
+                    Positioned(
+                      right: isImageRight ? -20 : null,
+                      left: isImageRight ? null : -20,
+                      top: -20,
+                      child: CircleAvatar(
+                        radius: 80,
+                        backgroundColor: Colors.white.withOpacity(0.15),
+                      ),
+                    ),
+
+                    // CONTENT: Row with Text and Image
+                    Row(
+                      // Swap direction based on index
+                      textDirection: isImageRight ? TextDirection.ltr : TextDirection.rtl,
+                      children: [
+                        // 1. The Text Side
+                        Expanded(
+                          flex: 3, // Takes up 60% of width
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: isImageRight ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  board['name'],
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    shadows: [
+                                      Shadow(
+                                        offset: Offset(1, 1),
+                                        blurRadius: 3.0,
+                                        color: Colors.black26,
+                                      ),
+                                    ],
+                                  ),
+                                  textAlign: isImageRight ? TextAlign.left : TextAlign.right,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // 2. The Image Side
+                        Expanded(
+                          flex: 2, // Takes up 40% of width
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Image.asset(
+                              board['image'],
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           );
         },
